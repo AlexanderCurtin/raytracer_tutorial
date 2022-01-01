@@ -11,6 +11,8 @@ use std::ops::Neg;
 use std::ops::Sub;
 use std::ops::SubAssign;
 
+use crate::utils::clamp;
+
 #[derive(Clone, Copy)]
 pub struct Vec3 {
     pub x: f64,
@@ -33,13 +35,27 @@ impl Vec3 {
         self.x.powf(2.) + self.y.powf(2.) + self.z.powf(2.)
     }
 
-    pub fn write_color<W: std::io::Write>(&self, writer: &mut BufWriter<W>) -> () {
+    pub fn write_color<W: std::io::Write>(
+        &self,
+        writer: &mut BufWriter<W>,
+        samples_per_pixel: usize,
+    ) -> () {
+        let mut r = self.x;
+        let mut g = self.y;
+        let mut b = self.z;
+
+        let scale = 1.0 / samples_per_pixel as f64;
+
+        r *= scale;
+        g *= scale;
+        b *= scale;
+
         writeln!(
             writer,
             "{} {} {}",
-            (self.x * 255.999) as i32,
-            (self.y * 255.999) as i32,
-            (self.z * 255.999) as i32
+            (256. * clamp(r, 0., 0.999)) as i32,
+            (256. * clamp(g, 0., 0.999)) as i32,
+            (256. * clamp(b, 0.0, 0.999)) as i32
         )
         .unwrap();
     }
