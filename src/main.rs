@@ -1,21 +1,19 @@
+mod camera;
+mod constants;
+mod vec3;
 use std::{
-    io::{stdout, BufWriter, Write as IoWrite},
+    io::{stdout, BufWriter},
     ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Sub, SubAssign},
     rc::Rc,
 };
 
-const INFINITY: f64 = f64::INFINITY;
-const pi: f64 = 3.1415926535891932384626;
+use constants::{INFINITY, PI};
+use vec3::{Color, Point3, Vec3};
+
+use crate::camera::Camera;
 
 pub fn degrees_to_radians(degrees: f64) -> f64 {
-    degrees * pi / 180.0
-}
-
-#[derive(Clone, Copy)]
-pub struct Vec3 {
-    x: f64,
-    y: f64,
-    z: f64,
+    degrees * PI / 180.0
 }
 
 pub struct HitRecord {
@@ -96,30 +94,6 @@ impl Hit for Sphere {
     }
 }
 
-type Point3 = Vec3;
-type Color = Vec3;
-
-impl Vec3 {
-    fn length(&self) -> f64 {
-        self.length_squared().sqrt()
-    }
-
-    fn length_squared(&self) -> f64 {
-        self.x.powf(2.) + self.y.powf(2.) + self.z.powf(2.)
-    }
-
-    fn write_color<W: std::io::Write>(&self, writer: &mut BufWriter<W>) -> () {
-        writeln!(
-            writer,
-            "{} {} {}",
-            (self.x * 255.999) as i32,
-            (self.y * 255.999) as i32,
-            (self.z * 255.999) as i32
-        )
-        .unwrap();
-    }
-}
-
 fn unit_vector(v: &Vec3) -> Vec3 {
     *v / v.length()
 }
@@ -134,123 +108,6 @@ fn cross(u: &Vec3, v: &Vec3) -> Vec3 {
 
 fn dot(u: &Vec3, v: &Vec3) -> f64 {
     return u.x * v.x + u.y * v.y + u.z * v.z;
-}
-
-impl Neg for Vec3 {
-    type Output = Self;
-
-    fn neg(self) -> Self::Output {
-        Vec3 {
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
-        }
-    }
-}
-
-impl Index<usize> for Vec3 {
-    type Output = f64;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        match index {
-            0 => &self.x,
-            1 => &self.y,
-            2 => &self.z,
-            _ => unimplemented!("Out of bounds"),
-        }
-    }
-}
-
-impl Add<Vec3> for Vec3 {
-    type Output = Vec3;
-
-    fn add(self, rhs: Vec3) -> Self::Output {
-        return Vec3 {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-            z: self.z + rhs.z,
-        };
-    }
-}
-
-impl Sub<Vec3> for Vec3 {
-    type Output = Vec3;
-
-    fn sub(self, rhs: Vec3) -> Self::Output {
-        return Vec3 {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-            z: self.z - rhs.z,
-        };
-    }
-}
-
-impl Mul<f64> for Vec3 {
-    type Output = Vec3;
-
-    fn mul(self, rhs: f64) -> Self::Output {
-        return Vec3 {
-            x: self.x * rhs,
-            y: self.y * rhs,
-            z: self.z * rhs,
-        };
-    }
-}
-
-impl Mul<Vec3> for f64 {
-    type Output = Vec3;
-
-    fn mul(self, rhs: Vec3) -> Self::Output {
-        return Vec3 {
-            x: self * rhs.x,
-            y: self * rhs.y,
-            z: self * rhs.z,
-        };
-    }
-}
-
-impl Div<f64> for Vec3 {
-    type Output = Vec3;
-
-    fn div(self, rhs: f64) -> Self::Output {
-        self * (1f64 / rhs)
-    }
-}
-
-impl Div<Vec3> for f64 {
-    type Output = Vec3;
-
-    fn div(self, rhs: Vec3) -> Self::Output {
-        return Vec3 {
-            x: self / rhs.x,
-            y: self / rhs.y,
-            z: self / rhs.z,
-        };
-    }
-}
-
-impl AddAssign<Vec3> for Vec3 {
-    fn add_assign(&mut self, rhs: Vec3) {
-        *self = rhs + *self;
-    }
-}
-
-impl SubAssign<Vec3> for Vec3 {
-    fn sub_assign(&mut self, rhs: Vec3) {
-        *self = rhs + *self;
-    }
-}
-
-impl MulAssign<f64> for Vec3 {
-    fn mul_assign(&mut self, rhs: f64) {
-        *self = *self * rhs;
-    }
-}
-
-impl DivAssign<f64> for Vec3 {
-    fn div_assign(&mut self, rhs: f64) {
-        *self = *self / rhs;
-    }
 }
 
 pub struct Ray {
@@ -288,19 +145,6 @@ impl Ray {
     }
 }
 
-fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
-    let oc = r.origin - *center;
-    let a = r.direction.length_squared();
-    let half_b = dot(&oc, &r.direction);
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = half_b * half_b - a * c;
-
-    if discriminant < 0. {
-        return -1.0;
-    };
-    (-half_b - discriminant.sqrt()) / a
-}
-
 fn main() {
     // Image
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
@@ -329,6 +173,8 @@ fn main() {
     }));
 
     // Camera
+
+    let camera = Camera::new();
 
     let viewport_height = 2.0;
     let viewport_width = ASPECT_RATIO * viewport_height;
