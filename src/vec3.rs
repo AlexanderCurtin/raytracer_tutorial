@@ -44,9 +44,10 @@ impl Vec3 {
         .unwrap();
     }
 }
-impl Into<Vec3> for f64 {
-    fn into(self) -> Vec3 {
-        Vec3::new(self, self, self)
+
+impl From<f64> for Vec3 {
+    fn from(x: f64) -> Self {
+        Vec3::new(x, x, x)
     }
 }
 

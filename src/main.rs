@@ -6,14 +6,12 @@ mod utils;
 mod vec3;
 use std::{
     io::{stdout, BufWriter},
-    ops::{Add, AddAssign, Div, DivAssign, Index, Mul, MulAssign, Neg, Sub, SubAssign},
     rc::Rc,
 };
 
-use constants::{INFINITY, PI};
 use hit::Hit;
-use utils::unit_vector;
-use vec3::{Color, Point3, Vec3};
+
+use vec3::{Point3, Vec3};
 
 use crate::{camera::Camera, hit::Sphere, ray::Ray};
 
