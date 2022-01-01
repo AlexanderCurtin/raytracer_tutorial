@@ -44,6 +44,11 @@ impl Vec3 {
         .unwrap();
     }
 }
+impl Into<Vec3> for f64 {
+    fn into(self) -> Vec3 {
+        Vec3::new(self, self, self)
+    }
+}
 
 impl Neg for Vec3 {
     type Output = Self;
