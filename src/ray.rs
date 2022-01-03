@@ -19,7 +19,7 @@ impl Ray {
             return Color::from(0.);
         }
         if let Some(rec) = world.hit(self, 0.001, INFINITY) {
-            let target = rec.p + rec.normal + Point3::random_in_unit_sphere();
+            let target = rec.p + rec.normal + Point3::random_unit_vector();
             return 0.5 * Ray::new(rec.p, target - rec.p).color(world, depth - 1);
         }
         let unit_direction = unit_vector(&self.direction);

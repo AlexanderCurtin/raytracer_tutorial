@@ -14,6 +14,7 @@ use std::ops::SubAssign;
 use crate::utils::clamp;
 use crate::utils::random_capped;
 use crate::utils::random_double;
+use crate::utils::unit_vector;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Vec3 {
@@ -83,6 +84,10 @@ impl Vec3 {
                 return p;
             }
         }
+    }
+
+    pub fn random_unit_vector() -> Self {
+        unit_vector(&Self::random_in_unit_sphere())
     }
 }
 
