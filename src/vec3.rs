@@ -89,11 +89,23 @@ impl Vec3 {
     pub fn random_unit_vector() -> Self {
         unit_vector(&Self::random_in_unit_sphere())
     }
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+        return self.x.abs() < s && self.y.abs() < s && self.z.abs() < s;
+    }
 }
 
 impl From<f64> for Vec3 {
     fn from(x: f64) -> Self {
         Vec3::new(x, x, x)
+    }
+}
+
+impl Mul<Vec3> for Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        Vec3::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
     }
 }
 

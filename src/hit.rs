@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
+    material::Material,
     utils::dot,
     vec3::{Point3, Vec3},
     Ray,
@@ -9,6 +10,7 @@ use crate::{
 pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,
+    pub mat_ptr: Rc<dyn Material>,
     pub t: f64,
     pub front_face: bool,
 }
@@ -31,6 +33,7 @@ pub trait Hit {
 pub struct Sphere {
     pub center: Point3,
     pub radius: f64,
+    pub mat_ptr: Rc<dyn Material>,
 }
 
 impl Hit for Vec<Rc<dyn Hit>> {
@@ -73,6 +76,7 @@ impl Hit for Sphere {
         let mut rec = HitRecord {
             p: r.at(root),
             normal: (p - self.center) / self.radius,
+            mat_ptr: self.mat_ptr.clone(),
             t: root,
             front_face: false,
         };

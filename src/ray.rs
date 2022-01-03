@@ -18,9 +18,11 @@ impl Ray {
         if depth <= 0 {
             return Color::from(0.);
         }
-        if let Some(rec) = world.hit(self, 0.001, INFINITY) {
-            let target = rec.p + rec.normal + Point3::random_unit_vector();
-            return 0.5 * Ray::new(rec.p, target - rec.p).color(world, depth - 1);
+        if let Some((attenuation, scattered)) = world
+            .hit(self, 0.001, INFINITY)
+            .and_then(|rec| rec.mat_ptr.scatter(self, &rec))
+        {
+            return attenuation * scattered.color(world, depth - 1);
         }
         let unit_direction = unit_vector(&self.direction);
         let t = 0.5 * (unit_direction.y + 1.);

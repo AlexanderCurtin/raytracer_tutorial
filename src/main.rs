@@ -1,6 +1,7 @@
 mod camera;
 mod constants;
 mod hit;
+mod material;
 mod ray;
 mod utils;
 mod vec3;
@@ -13,7 +14,14 @@ use hit::Hit;
 
 use vec3::{Point3, Vec3};
 
-use crate::{camera::Camera, hit::Sphere, ray::Ray, utils::random_double, vec3::Color};
+use crate::{
+    camera::Camera,
+    hit::Sphere,
+    material::{Lambertian, Metal},
+    ray::Ray,
+    utils::random_double,
+    vec3::Color,
+};
 
 fn main() {
     // Image
@@ -23,17 +31,45 @@ fn main() {
     const SAMPLES_PER_PIXEL: usize = 100;
     const MAX_DEPTH: usize = 50;
 
+    let material_groud = Rc::new(Lambertian {
+        albedo: Color::new(0.8, 0.8, 0.0),
+    });
+    let material_center = Rc::new(Lambertian {
+        albedo: Color::new(0.7, 0.3, 0.3),
+    });
+    let material_left = Rc::new(Metal {
+        albedo: Color::from(0.8),
+    });
+
+    let material_right = Rc::new(Metal {
+        albedo: Color::new(0.8, 0.6, 0.2),
+    });
+
     // World
     let mut world: Vec<Rc<dyn Hit>> = Vec::new();
 
     world.push(Rc::new(Sphere {
-        center: Point3::new(0., 0., -1.),
-        radius: 0.5,
+        center: Point3::new(0., -100.5, -1.),
+        radius: 100.,
+        mat_ptr: material_groud,
     }));
 
     world.push(Rc::new(Sphere {
-        center: Point3::new(0., -100.5, -1.),
-        radius: 100.,
+        center: Point3::new(0., 0., -1.),
+        radius: 0.5,
+        mat_ptr: material_center,
+    }));
+
+    world.push(Rc::new(Sphere {
+        center: Point3::new(-1., 0., -1.),
+        radius: 0.5,
+        mat_ptr: material_left,
+    }));
+
+    world.push(Rc::new(Sphere {
+        center: Point3::new(1., 0., -1.),
+        radius: 0.5,
+        mat_ptr: material_right,
     }));
 
     // Camera

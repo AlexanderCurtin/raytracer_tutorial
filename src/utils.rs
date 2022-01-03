@@ -40,3 +40,7 @@ pub fn cross(u: &Vec3, v: &Vec3) -> Vec3 {
 pub fn dot(u: &Vec3, v: &Vec3) -> f64 {
     return u.x * v.x + u.y * v.y + u.z * v.z;
 }
+
+pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+    *v - (dot(v, n) * 2.) * *n
+}
