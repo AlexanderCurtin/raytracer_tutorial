@@ -25,6 +25,10 @@ pub fn random_double() -> f64 {
     Uniform::<f64>::new(0.0, 1.).sample(&mut rng)
 }
 
+pub fn random_capped(min: f64, max: f64) -> f64 {
+    min + (max - min) * random_double()
+}
+
 pub fn cross(u: &Vec3, v: &Vec3) -> Vec3 {
     Vec3 {
         x: u.y * v.z - u.z * v.y,

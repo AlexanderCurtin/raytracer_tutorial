@@ -21,6 +21,7 @@ fn main() {
     const IMAGE_WIDTH: usize = 400;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
     const SAMPLES_PER_PIXEL: usize = 100;
+    const MAX_DEPTH: usize = 50;
 
     // World
     let mut world: Vec<Rc<dyn Hit>> = Vec::new();
@@ -39,19 +40,6 @@ fn main() {
 
     let camera = Camera::new();
 
-    let viewport_height = 2.0;
-    let viewport_width = ASPECT_RATIO * viewport_height;
-    let focal_length = 1.0;
-
-    let origin: Vec3 = (0.).into();
-    let horizontal = Vec3::new(viewport_width, 0., 0.);
-
-    let vertical = Vec3 {
-        x: 0.,
-        y: viewport_height,
-        z: 0.,
-    };
-
     print!("P3\n{} {} \n255\n", IMAGE_WIDTH, IMAGE_HEIGHT);
     let mut writer = BufWriter::new(stdout());
     for j in (0..IMAGE_HEIGHT).rev() {
@@ -63,7 +51,7 @@ fn main() {
                 let v = (j as f64 + random_double()) / (IMAGE_HEIGHT - 1) as f64;
 
                 let r = camera.get_ray(u, v);
-                pixel_color += r.color(&world);
+                pixel_color += r.color(&world, MAX_DEPTH);
             }
             pixel_color.write_color(&mut writer, SAMPLES_PER_PIXEL);
         }

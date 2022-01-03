@@ -12,8 +12,10 @@ use std::ops::Sub;
 use std::ops::SubAssign;
 
 use crate::utils::clamp;
+use crate::utils::random_capped;
+use crate::utils::random_double;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Vec3 {
     pub x: f64,
     pub y: f64,
@@ -46,9 +48,9 @@ impl Vec3 {
 
         let scale = 1.0 / samples_per_pixel as f64;
 
-        r *= scale;
-        g *= scale;
-        b *= scale;
+        r = (scale * r).sqrt();
+        g = (scale * g).sqrt();
+        b = (scale * b).sqrt();
 
         writeln!(
             writer,
@@ -58,6 +60,29 @@ impl Vec3 {
             (256. * clamp(b, 0.0, 0.999)) as i32
         )
         .unwrap();
+    }
+
+    pub fn random() -> Self {
+        Self::new(random_double(), random_double(), random_double())
+    }
+
+    pub fn random_capped(min: f64, max: f64) -> Self {
+        Self::new(
+            random_capped(min, max),
+            random_capped(min, max),
+            random_capped(min, max),
+        )
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = Self::random_capped(-1., 1.);
+            //println!("{}", p.length_squared());
+            //println!("{:?}", p);
+            if p.length_squared() < 1. {
+                return p;
+            }
+        }
     }
 }
 
