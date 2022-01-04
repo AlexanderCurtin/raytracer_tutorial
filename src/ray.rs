@@ -18,15 +18,19 @@ impl Ray {
         if depth <= 0 {
             return Color::from(0.);
         }
-        if let Some((attenuation, scattered)) = world
-            .hit(self, 0.001, INFINITY)
-            .and_then(|rec| rec.mat_ptr.scatter(self, &rec))
-        {
+        let hit = world.hit(self, 0.001, INFINITY);
+        if hit.is_none() {
+            let unit_direction = unit_vector(&self.direction);
+            let t = 0.5 * (unit_direction.y + 1.);
+            return (1. - t) * Color::from(1.) + t * Color::new(0.5, 0.7, 1.0);
+        }
+
+        let rec = hit.unwrap();
+
+        if let Some((attenuation, scattered)) = rec.mat_ptr.scatter(self, &rec) {
             return attenuation * scattered.color(world, depth - 1);
         }
-        let unit_direction = unit_vector(&self.direction);
-        let t = 0.5 * (unit_direction.y + 1.);
-        return (1. - t) * Color::from(1.) + t * Color::new(0.5, 0.7, 1.0);
+        return Color::from(0.);
     }
 
     pub fn new(origin: Point3, direction: Vec3) -> Self {
